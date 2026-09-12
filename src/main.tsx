@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastProvider } from './contexts/ToastContext'
 import { ProfileProvider } from './contexts/ProfileContext'
+import { AppErrorBoundary } from './components/ui/AppErrorBoundary'
 import './index.css'
 
 const CHUNK_RELOAD_KEY = 'lunatica-last-chunk-reload'
@@ -26,16 +27,18 @@ if (window.location.hash.startsWith('#error=')) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <ToastProvider>
-        <HashRouter>
-          <AuthProvider>
-            <ProfileProvider>
-              <App />
-            </ProfileProvider>
-          </AuthProvider>
-        </HashRouter>
-      </ToastProvider>
-    </ThemeProvider>
+    <AppErrorBoundary>
+      <ThemeProvider>
+        <ToastProvider>
+          <HashRouter>
+            <AuthProvider>
+              <ProfileProvider>
+                <App />
+              </ProfileProvider>
+            </AuthProvider>
+          </HashRouter>
+        </ToastProvider>
+      </ThemeProvider>
+    </AppErrorBoundary>
   </StrictMode>,
 )

@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { LogOut, RefreshCw, WifiOff } from 'lucide-react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LogoMark } from './components/ui/Logo'
 import { useAuth } from './contexts/AuthContext'
@@ -16,9 +17,43 @@ function LoadingScreen() {
   return <div className="app-shell flex min-h-screen items-center justify-center"><div className="loading-emblem" role="status" aria-label="Carregando a Lunatica"><LogoMark className="!h-14 !w-14" /></div></div>
 }
 
+function ProfileRecovery({ message }: { message?: string | null }) {
+  const { refreshProfile } = useProfile()
+  const { signOut } = useAuth()
+  const { showToast } = useToast()
+  const [retrying, setRetrying] = useState(false)
+
+  async function retry() {
+    setRetrying(true)
+    try { await refreshProfile() }
+    catch { /* O contexto mantém a tela de recuperação e a mensagem amigável. */ }
+    finally { setRetrying(false) }
+  }
+
+  async function logout() {
+    try { await signOut() }
+    catch { showToast('Não foi possível sair agora. Recarregue a página e tente novamente.', 'error') }
+  }
+
+  return (
+    <div className="app-shell flex min-h-dvh items-center justify-center p-5">
+      <section className="recovery-card" role="alert">
+        <span className="recovery-icon"><WifiOff className="h-5 w-5" /></span>
+        <span className="micro-label">CONEXÃO INTERROMPIDA</span>
+        <h1>Não conseguimos abrir seu espaço.</h1>
+        <p>{message || 'Seu perfil não ficou disponível. Isso costuma ser temporário e nenhuma conversa foi perdida.'}</p>
+        <div>
+          <button type="button" className="btn-primary" onClick={() => void retry()} disabled={retrying}><RefreshCw className={`h-4 w-4 ${retrying ? 'animate-spin' : ''}`} /> {retrying ? 'Tentando…' : 'Tentar novamente'}</button>
+          <button type="button" className="btn-secondary" onClick={() => void logout()}><LogOut className="h-4 w-4" /> Sair</button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
 function PrivateArea({ conversation = false }: { conversation?: boolean }) {
   const { session } = useAuth()
-  const { profile, loading } = useProfile()
+  const { profile, loading, error } = useProfile()
   const { setTheme } = useTheme()
 
   useEffect(() => {
@@ -26,16 +61,18 @@ function PrivateArea({ conversation = false }: { conversation?: boolean }) {
   }, [profile?.theme, setTheme])
 
   if (!session) return conversation ? <Navigate to="/" replace /> : <GuestPage />
-  if (loading || !profile) return <LoadingScreen />
+  if (loading) return <LoadingScreen />
+  if (!profile) return <ProfileRecovery message={error} />
   if (!profile.onboarding_completed) return <Navigate to="/onboarding" replace />
   return <ChatPage />
 }
 
 function OnboardingRoute() {
   const { session } = useAuth()
-  const { profile, loading } = useProfile()
+  const { profile, loading, error } = useProfile()
   if (!session) return <Navigate to="/login?mode=signup" replace />
-  if (loading || !profile) return <LoadingScreen />
+  if (loading) return <LoadingScreen />
+  if (!profile) return <ProfileRecovery message={error} />
   if (profile.onboarding_completed) return <Navigate to="/" replace />
   return <OnboardingPage />
 }

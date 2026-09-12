@@ -7,6 +7,7 @@ interface ProfileContextValue {
   profile: Profile | null
   avatarUrl: string | null
   loading: boolean
+  error: string | null
   refreshProfile: () => Promise<void>
   saveProfile: (updates: Partial<Pick<Profile, 'display_name' | 'username' | 'avatar_path' | 'custom_instructions' | 'onboarding_completed' | 'theme'>>) => Promise<Profile>
   uploadAvatar: (file: File) => Promise<void>
@@ -19,6 +20,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const resolveAvatar = useCallback(async (nextProfile: Profile | null) => {
     if (!nextProfile?.avatar_path) {
@@ -33,14 +35,21 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     if (!user) {
       setProfile(null)
       setAvatarUrl(null)
+      setError(null)
       return
     }
     setLoading(true)
+    setError(null)
     try {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       if (error) throw error
       setProfile(data)
       await resolveAvatar(data)
+    } catch (nextError) {
+      setProfile(null)
+      setAvatarUrl(null)
+      setError('Não foi possível carregar seu perfil. Confira sua conexão e tente novamente.')
+      throw nextError
     } finally {
       setLoading(false)
     }
@@ -82,7 +91,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     }
   }, [profile?.avatar_path, saveProfile, user])
 
-  const value = useMemo<ProfileContextValue>(() => ({ profile, avatarUrl, loading, refreshProfile, saveProfile, uploadAvatar }), [avatarUrl, loading, profile, refreshProfile, saveProfile, uploadAvatar])
+  const profileLoading = loading || Boolean(user && !profile && !error)
+  const value = useMemo<ProfileContextValue>(() => ({ profile, avatarUrl, loading: profileLoading, error, refreshProfile, saveProfile, uploadAvatar }), [avatarUrl, error, profile, profileLoading, refreshProfile, saveProfile, uploadAvatar])
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>
 }
 

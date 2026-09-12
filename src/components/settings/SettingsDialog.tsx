@@ -82,6 +82,18 @@ export function SettingsDialog({ open, initialTab = 'general', usage, plan, expi
     finally { setBusy(false) }
   }
 
+  async function logout() {
+    setBusy(true)
+    try {
+      await signOut()
+      onClose()
+    } catch (error) {
+      showToast(friendlyError(error), 'error')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <>
       <Modal open={open} onClose={onClose} title="Central da Lunatica" description="Sua conta, memória, assinatura e informações importantes." size="wide">
@@ -92,7 +104,7 @@ export function SettingsDialog({ open, initialTab = 'general', usage, plan, expi
             {tab === 'general' && <div>
               <section><h3 className="text-sm font-semibold">Aparência</h3><p className="mt-1 text-xs leading-5 text-zinc-500">Escolha a atmosfera visual da interface.</p><div className="mt-4 grid gap-3 sm:grid-cols-3">{([{ value: 'light', label: 'Claro lunar', note: 'Branco suave e legível.', icon: Sun }, { value: 'dark', label: 'Escuro grafite', note: 'Carvão confortável.', icon: Moon }, { value: 'black', label: 'Preto eclipse', note: 'Contraste máximo.', icon: Moon }] as const).map((option) => <button key={option.value} type="button" onClick={() => void selectTheme(option.value as Theme)} className={`theme-card ${theme === option.value ? 'active' : ''}`}><span className={`theme-swatch ${option.value}`}><option.icon className="h-4 w-4" /></span><span><strong>{option.label}</strong><small>{option.note}</small></span></button>)}</div></section>
               <section className="mt-7"><div className="flex items-center justify-between"><div><h3 className="text-sm font-semibold">{usage?.unlimited ? 'Uso LunaMax' : 'Uso diário'}</h3><p className="mt-1 text-xs leading-5 text-zinc-500">{usage?.unlimited ? 'Seu plano não usa limite diário nem limite de contexto.' : 'Avisaremos quando seu limite gratuito estiver perto do fim.'}</p></div>{usage?.plan === 'lunamax' && <span className="plan-badge"><Sparkles className="h-3 w-3" /> LunaMax</span>}</div><div className="mt-4 rounded-2xl border border-lunar-400/15 bg-lunar-500/[0.055] p-4"><div className="flex items-center justify-between gap-3"><span className="flex items-center gap-2 text-sm"><Sparkles className="h-4 w-4 text-lunar-300" /> {usage?.unlimited ? 'Acesso ampliado' : 'Plano gratuito'}</span><strong className={usageNearLimit ? 'text-amber-300' : 'text-lunar-300'}>{usage?.unlimited ? 'LunaMax ativo' : usageNearLimit ? 'Quase no limite' : 'Disponível'}</strong></div><div className="mt-4 flex items-start gap-2 border-t border-white/10 pt-3 text-xs leading-5 text-zinc-500"><Paperclip className="mt-0.5 h-4 w-4 shrink-0" />{usage?.unlimited ? 'Mensagens e anexos não reduzem seu acesso. O limite técnico continua em 3 arquivos por envio.' : 'Mensagens e anexos usam o acesso gratuito. O contador fica oculto; você recebe um aviso antes de acabar.'}</div></div></section>
-              <section className="mt-7 border-t border-white/10 pt-6"><h3 className="text-sm font-semibold">Conta e suporte</h3><div className="mt-3 grid gap-2"><a href="mailto:core.healops@gmail.com?subject=Suporte%20Lunatica" className="settings-row !mt-0 border border-white/10"><Headphones className="h-4 w-4" /><span><strong>Falar com o suporte</strong><small>core.healops@gmail.com</small></span></a><button type="button" onClick={() => void signOut()} className="settings-row !mt-0 border border-white/10"><LogOut className="h-4 w-4" /><span><strong>Sair da conta</strong><small>Encerra a sessão neste dispositivo.</small></span></button></div><button type="button" onClick={() => setConfirmClear(true)} className="danger-row mt-3 border border-red-500/15"><Trash2 className="h-4 w-4" /><span><strong>Limpar todo o histórico</strong><small>Exclui conversas, mensagens e anexos. Suas memórias ficam preservadas.</small></span></button></section>
+              <section className="mt-7 border-t border-white/10 pt-6"><h3 className="text-sm font-semibold">Conta e suporte</h3><div className="mt-3 grid gap-2"><a href="mailto:core.healops@gmail.com?subject=Suporte%20Lunatica" className="settings-row !mt-0 border border-white/10"><Headphones className="h-4 w-4" /><span><strong>Falar com o suporte</strong><small>core.healops@gmail.com</small></span></a><button type="button" onClick={() => void logout()} disabled={busy} className="settings-row !mt-0 border border-white/10"><LogOut className="h-4 w-4" /><span><strong>Sair da conta</strong><small>Encerra a sessão neste dispositivo.</small></span></button></div><button type="button" onClick={() => setConfirmClear(true)} className="danger-row mt-3 border border-red-500/15"><Trash2 className="h-4 w-4" /><span><strong>Limpar todo o histórico</strong><small>Exclui conversas, mensagens e anexos. Suas memórias ficam preservadas.</small></span></button></section>
             </div>}
 
             {tab === 'memory' && <MemoryPanel memories={memories} loading={memoryLoading} onAdd={onAddMemory} onDelete={onDeleteMemory} />}

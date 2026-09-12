@@ -6,10 +6,10 @@ import { Logo } from '../components/ui/Logo'
 import { Modal } from '../components/ui/Modal'
 
 const suggestions = [
-  { label: 'Revisar meu código', prompt: 'Revise este código comigo: encontre a causa do problema, riscos e a correção mais simples.', icon: Code2 },
-  { label: 'Destravar uma ideia', prompt: 'Tenho uma ideia ainda confusa. Faça perguntas úteis e transforme-a em um plano concreto.', icon: Lightbulb },
-  { label: 'Escrever sem enrolação', prompt: 'Ajude a escrever um texto claro, natural e bem estruturado, sem frases genéricas.', icon: Sparkles },
-  { label: 'Decidir o próximo passo', prompt: 'Compare minhas opções com honestidade e recomende o próximo passo mais sensato.', icon: Search },
+  { tag: 'CÓDIGO', label: 'Revisar meu código', prompt: 'Revise este código comigo: encontre a causa do problema, riscos e a correção mais simples.', icon: Code2 },
+  { tag: 'IDEIA', label: 'Destravar uma ideia', prompt: 'Tenho uma ideia ainda confusa. Faça perguntas úteis e transforme-a em um plano concreto.', icon: Lightbulb },
+  { tag: 'TEXTO', label: 'Escrever sem enrolação', prompt: 'Ajude a escrever um texto claro, natural e bem estruturado, sem frases genéricas.', icon: Sparkles },
+  { tag: 'DECISÃO', label: 'Decidir o próximo passo', prompt: 'Compare minhas opções com honestidade e recomende o próximo passo mais sensato.', icon: Search },
 ]
 
 export function GuestPage() {
@@ -48,9 +48,9 @@ export function GuestPage() {
         <header className="mission-header relative z-10"><button type="button" onClick={() => setMobileOpen(true)} className="icon-btn lg:hidden" aria-label="Abrir menu"><Menu className="h-5 w-5" /></button><Logo compact className="lg:hidden" /><div className="hidden min-w-0 flex-1 items-center gap-3 lg:flex"><span className="micro-label">MODELO LUNATICA 1.5</span><span className="status-dot">online</span></div><div className="ml-auto flex items-center gap-2"><button type="button" onClick={openLogin} className="hidden px-3 py-2 text-sm text-zinc-500 transition hover:text-lunar-600 dark:text-zinc-400 dark:hover:text-white sm:inline-flex">Entrar</button><button type="button" onClick={openSignup} className="btn-primary !px-3.5 !py-2">Criar conta <ArrowRight className="h-4 w-4" /></button></div></header>
 
         <div className="chat-canvas relative z-[1] min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <section className="mx-auto flex min-h-full w-full max-w-5xl flex-col items-center justify-center px-5 py-12 text-center lg:px-10">
+          <section className="empty-stage mx-auto flex min-h-full w-full max-w-5xl flex-col items-center justify-center px-5 py-12 text-center lg:px-10">
             <div className="relative animate-fade-in"><span className="empty-signal" aria-hidden="true"><i /><i /><i /></span><span className="micro-label mt-5 inline-flex items-center gap-2">LUNATICA 1.5 · SINAL ABERTO</span><h1 className="mt-5 text-5xl font-semibold leading-none tracking-[-.065em] sm:text-7xl">Como posso ajudar?</h1><p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-[var(--muted)] sm:text-base">Código que chega à causa, texto com pulso e ideias que saem do rascunho. Sem resposta de vitrine.</p><div className="mt-7 flex justify-center gap-2"><button type="button" onClick={openSignup} className="btn-primary"><Sparkles className="h-4 w-4" /> Começar agora</button><button type="button" onClick={openLogin} className="btn-secondary"><LogIn className="h-4 w-4" /> Entrar</button></div></div>
-            <div className="relative mt-10 grid w-full max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">{suggestions.map(({ label, prompt, icon: Icon }, index) => <button key={label} type="button" onClick={() => setDraft(prompt)} className="suggestion-square"><span>0{index + 1}</span><Icon className="h-5 w-5" /><strong>{label}</strong></button>)}</div>
+            <div className="empty-suggestions relative mt-10 grid w-full max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">{suggestions.map(({ tag, label, prompt, icon: Icon }) => <button key={label} type="button" onClick={() => setDraft(prompt)} className="suggestion-square"><span>{tag}</span><Icon className="h-5 w-5" /><strong>{label}</strong></button>)}</div>
           </section>
         </div>
 

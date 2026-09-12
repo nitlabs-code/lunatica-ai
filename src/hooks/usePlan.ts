@@ -38,9 +38,19 @@ export function usePlan(session: Session) {
 
   useEffect(() => {
     if (!plan) return
-    const remaining = new Date(plan.expires_at).getTime() - Date.now()
-    const timer = window.setTimeout(() => applyPlan(plan), Math.max(0, Math.min(remaining + 500, 2_147_000_000)))
-    return () => window.clearTimeout(timer)
+    let timer: number | undefined
+    const checkExpiration = () => {
+      const remaining = new Date(plan.expires_at).getTime() - Date.now()
+      if (remaining <= 0) {
+        applyPlan(plan)
+        return
+      }
+      // Reconfere diariamente para não depender do limite de ~24 dias dos
+      // timers do navegador em assinaturas de 30 dias.
+      timer = window.setTimeout(checkExpiration, Math.min(remaining + 500, 24 * 60 * 60 * 1000))
+    }
+    checkExpiration()
+    return () => { if (timer !== undefined) window.clearTimeout(timer) }
   }, [applyPlan, plan])
 
   const redeem = useCallback(async (code: string, acceptedDisclaimer: boolean) => {

@@ -295,12 +295,15 @@ export function useChat({ user, session, onNotify, onAnalyzeMemory }: UseChatOpt
       const attachments = files.length ? await uploadFiles(conversationId, userMessage.id, files) : []
       setMessages((current) => [...current, { ...userMessage, attachments }])
       const targetConversationId = conversationId
-      const assistantMessageId = await generate(targetConversationId)
-      // Memory classification starts after the answer so it never competes
-      // with the latency-sensitive Gemini stream.
-      if (!isTemporary && onAnalyzeMemory) {
-        void onAnalyzeMemory(userMessage.id).then((activity) => markMemoryActivity(targetConversationId, assistantMessageId, activity))
-      }
+      // O composer pode ser liberado assim que a mensagem e os anexos estão
+      // seguros. A geração durável continua mesmo após trocar de rota ou aba.
+      void generate(targetConversationId).then((assistantMessageId) => {
+        // A memória só é analisada depois da resposta para não disputar
+        // latência com o stream principal do Gemini.
+        if (!isTemporary && onAnalyzeMemory) {
+          void onAnalyzeMemory(userMessage.id).then((activity) => markMemoryActivity(targetConversationId, assistantMessageId, activity))
+        }
+      })
       return conversationId
     } catch (error) {
       if (!createdConversation && insertedMessageId) await supabase.from('messages').delete().eq('id', insertedMessageId)
