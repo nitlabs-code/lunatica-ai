@@ -1,5 +1,4 @@
 import { ArrowUpRight, Code2, Lightbulb, PenLine, Split } from 'lucide-react'
-import { LogoMark } from '../ui/Logo'
 
 const starters = [
   { tag: '01 / CONSTRUIR', title: 'Do bug à solução.', detail: 'Cole o código. Vamos encontrar a causa.', icon: Code2, prompt: 'Quero revisar um código. Vou colar o trecho e explicar o comportamento esperado para encontrarmos a causa do problema.' },
@@ -15,7 +14,7 @@ export function WelcomePanel({ onSelect }: { onSelect: (prompt: string) => void 
   }
 
   return <section className="welcome-panel">
-    <div className="welcome-signature"><LogoMark /><span>LUNATICA <b>1.5</b></span><span className="welcome-rule" aria-hidden="true" /></div>
+    <div className="welcome-signature"><span>LUNATICA <b>1.5</b></span><span className="welcome-rule" aria-hidden="true" /></div>
     <div className="welcome-intro"><span className="welcome-eyebrow">UM ESPAÇO PARA PENSAR JUNTO</span><h1>Como posso ajudar?</h1><p>Traga a pergunta difícil, o código teimoso ou aquela ideia que ainda não tem nome.</p></div>
     <div className="welcome-grid">{starters.map(({ tag, title, detail, icon: Icon, prompt }) => <button className="welcome-card" type="button" key={tag} onClick={() => select(prompt)}><span className="welcome-card-top"><span>{tag}</span><ArrowUpRight className="h-4 w-4" /></span><Icon className="welcome-card-icon" /><strong>{title}</strong><small>{detail}</small></button>)}</div>
     <p className="welcome-footnote"><span aria-hidden="true">✦</span> Seu ponto de partida pode ser uma frase, uma foto ou um arquivo.</p>
