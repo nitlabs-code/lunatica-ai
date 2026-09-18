@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowDown, ArrowRight, CircleAlert, Lightbulb, Orbit, PenLine, RefreshCw, Search, Sparkles, WifiOff, X } from 'lucide-react'
+import { ArrowDown, ArrowRight, CircleAlert, Orbit, RefreshCw, Sparkles, WifiOff, X } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MessageBubble } from '../components/chat/MessageBubble'
+import { WelcomePanel } from '../components/chat/WelcomePanel'
 import { MessageComposer } from '../components/chat/MessageComposer'
 import { ChatHeaderActions } from '../components/chat/ChatHeaderActions'
 import { ProfileDialog } from '../components/profile/ProfileDialog'
@@ -14,13 +15,6 @@ import { useChat } from '../hooks/useChat'
 import { useMemories } from '../hooks/useMemories'
 import { usePlan } from '../hooks/usePlan'
 import { friendlyError } from '../lib/utils'
-
-const suggestions = [
-  { tag: 'CÓDIGO', label: 'Revisar meu código', prompt: 'Revise este código comigo: encontre a causa do problema, riscos e a correção mais simples.', icon: PenLine },
-  { tag: 'IDEIA', label: 'Destravar uma ideia', prompt: 'Tenho uma ideia ainda confusa. Faça perguntas úteis e transforme-a em um plano concreto.', icon: Lightbulb },
-  { tag: 'TEXTO', label: 'Escrever sem enrolação', prompt: 'Ajude a escrever um texto claro, natural e bem estruturado, sem frases genéricas.', icon: Sparkles },
-  { tag: 'DECISÃO', label: 'Decidir o próximo passo', prompt: 'Compare minhas opções com honestidade e recomende o próximo passo mais sensato.', icon: Search },
-]
 
 export function ChatPage() {
   const { user, session, signOut } = useAuth()
@@ -175,10 +169,7 @@ export function ChatPage() {
           {chat.loadingMessages ? (
             <div className="mx-auto max-w-3xl space-y-8 px-6 py-10">{Array.from({ length: 3 }).map((_, index) => <div key={index} className={`h-20 animate-pulse rounded-2xl bg-zinc-200/70 dark:bg-white/[0.04] ${index % 2 === 0 ? 'ml-auto w-2/3' : 'w-full'}`} />)}</div>
           ) : chat.messages.length === 0 ? (
-            <section className="empty-stage relative mx-auto flex min-h-full w-full max-w-5xl flex-col items-center justify-center px-5 py-12 text-center">
-              <div className="relative"><span className="empty-signal" aria-hidden="true"><i /><i /><i /></span><span className="micro-label mt-5 inline-flex items-center gap-2">LUNATICA 1.5 · SINAL ABERTO</span><h2 className="mt-5 text-4xl font-semibold tracking-[-.055em] sm:text-6xl">Como posso ajudar?</h2><p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-[var(--muted)]">Jogue a parte difícil aqui. Eu organizo o caos, explico o raciocínio e fico até a ideia funcionar.</p></div>
-              <div className="empty-suggestions relative mt-10 grid w-full max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">{suggestions.map(({ tag, label, prompt, icon: Icon }) => <button key={label} type="button" onClick={() => void send(prompt)} className="suggestion-square"><span>{tag}</span><Icon className="h-5 w-5 text-lunar-300" /><strong>{label}</strong></button>)}</div>
-            </section>
+            <WelcomePanel onSelect={updateDraft} />
           ) : (
             <div className="space-y-8 py-8 sm:space-y-10 sm:py-10">
               {chat.messages.map((message) => <MessageBubble key={message.id} message={message} generating={chat.generating} canRegenerate={message.id === lastAssistantId} onRegenerate={chat.regenerateMessage} onEdit={chat.editUserMessage} onOpenMemory={() => openSettings('memory')} />)}
