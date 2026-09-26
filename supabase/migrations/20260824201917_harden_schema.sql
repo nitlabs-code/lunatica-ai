@@ -1,6 +1,13 @@
 -- The platform event trigger keeps RLS enabled on newly created public tables.
 -- It does not need to be callable through the Data API.
-revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
+-- Guarded so fresh replays (supabase db reset, local, preview branches) don't
+-- fail where the platform function doesn't exist.
+do $$
+begin
+  if to_regprocedure('public.rls_auto_enable()') is not null then
+    revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
+  end if;
+end $$;
 
 -- The Edge Function uses service_role, which bypasses RLS. Client roles remain
 -- explicitly denied even if table grants are changed accidentally in the future.
