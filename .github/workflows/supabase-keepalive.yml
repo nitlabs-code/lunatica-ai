@@ -1,10 +1,11 @@
 name: Supabase keep-alive
 
 # Free-tier Supabase projects are paused after 7 days without activity.
-# This pings the database once a day through the Data API so that never
+# This pings the database twice a day through the Data API so that never
 # happens. It calls public.keepalive() (supabase/migrations/
-# 20260926020000_keepalive_rpc.sql), which just returns now() and is the
-# only thing anon can execute.
+# 20261006184000_keepalive_real_query.sql), which upserts a single-row
+# heartbeat table in the private schema (real table read + write) and returns
+# its timestamp. It is the only thing anon can execute.
 #
 # Uses the same repo secrets as deploy.yml (public anon/publishable key only,
 # never the service_role key).
@@ -14,7 +15,8 @@ name: Supabase keep-alive
 
 on:
   schedule:
-    - cron: '17 9 * * *' # daily, 09:17 UTC (06:17 BRT)
+    - cron: '17 9 * * *' # 09:17 UTC (06:17 BRT)
+    - cron: '17 21 * * *' # 21:17 UTC (18:17 BRT)
   workflow_dispatch:
 
 permissions: {}
